@@ -3,5 +3,5 @@
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 google-genai==1.68.0
-pinecone-client==8.1.0
+pinecone==8.1.0
 python-dotenv==1.2.2
