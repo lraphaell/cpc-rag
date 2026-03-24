@@ -1,0 +1,11 @@
+# Minimal dependencies for Streamlit Cloud deployment
+# Use this file instead of requirements.txt for the chat app
+# (avoids heavy ingestion-only deps like sentence-transformers, langchain, docling)
+
+streamlit>=1.31.0
+google-genai>=1.0.0
+pinecone-client>=3.0.0
+python-dotenv>=1.0.0
+
+# Optional: Anthropic Claude as fallback LLM
+# anthropic>=0.40.0

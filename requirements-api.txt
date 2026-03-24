@@ -1,0 +1,7 @@
+# Minimal dependencies for the Genova RAG retrieval endpoint (Render.com)
+# Note: anthropic is intentionally excluded — synthesis is delegated to n8n's AI Agent node
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+google-genai==1.68.0
+pinecone-client==8.1.0
+python-dotenv==1.2.2

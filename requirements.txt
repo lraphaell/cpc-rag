@@ -1,0 +1,38 @@
+# Core dependencies for WAT framework
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Google APIs (REQUIRED for Google Drive integration)
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+google-api-python-client>=2.100.0
+gspread>=5.11.0
+
+# Data processing (REQUIRED for RAG pipeline)
+pandas>=2.1.0
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+
+# Document parsing (REQUIRED for multi-format support)
+docling>=1.0.0
+PyPDF2>=3.0.0
+python-docx>=1.1.0
+python-pptx>=0.6.23
+chardet>=5.2.0
+
+# Pinecone (REQUIRED for vector database)
+pinecone-client>=3.0.0
+
+# Streamlit (REQUIRED for RAG chat interface)
+streamlit>=1.31.0
+
+# Google Gemini (PRIMARY LLM for answer synthesis + embeddings)
+google-genai>=1.0.0
+
+# Multimodal embedding support (PDF/PPTX image extraction + page rendering)
+pdf2image>=1.17.0          # Requires poppler: brew install poppler
+Pillow>=10.0.0
+
+# Anthropic Claude API (OPTIONAL fallback LLM)
+# anthropic>=0.40.0
