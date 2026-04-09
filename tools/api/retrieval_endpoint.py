@@ -34,18 +34,32 @@ app = FastAPI(title="Genova RAG Retrieval", version="1.0")
 # and add the same value as X-API-Key header in n8n's HTTP Request node.
 RETRIEVAL_API_KEY = os.getenv("RETRIEVAL_API_KEY", "")
 
-# Initialize once at startup (cached for the lifetime of the process)
-_client: Optional[PineconeClient] = None
+# Trello index config — set TRELLO_INDEX_NAME and TRELLO_NAMESPACE in Render dashboard
+TRELLO_INDEX_NAME = os.getenv("TRELLO_INDEX_NAME", "trello")
+TRELLO_NAMESPACE = os.getenv("TRELLO_NAMESPACE", "")
+
+# Clients cached by index key (one per index, initialized on first use)
+_clients: dict = {}
 
 # Allowed Pinecone metadata filter keys (prevents arbitrary key injection)
 _ALLOWED_FILTER_KEYS = {"country", "team", "bandera", "fecha", "drive_file_id"}
 
+# Allowed index names (prevents querying arbitrary indexes)
+_ALLOWED_INDEXES = {"genova-v2", "trello"}
 
-def get_client() -> PineconeClient:
-    global _client
-    if _client is None:
-        _client = PineconeClient()
-    return _client
+
+def get_client(index_name: Optional[str] = None) -> PineconeClient:
+    global _clients
+    key = index_name or "default"
+    if key not in _clients:
+        if index_name == TRELLO_INDEX_NAME:
+            _clients[key] = PineconeClient(
+                index_name=TRELLO_INDEX_NAME,
+                namespace=TRELLO_NAMESPACE,
+            )
+        else:
+            _clients[key] = PineconeClient()  # uses PINECONE_INDEX_NAME from env
+    return _clients[key]
 
 
 def _verify_api_key(x_api_key: str) -> None:
@@ -60,6 +74,7 @@ class RetrieveRequest(BaseModel):
     question: str
     top_k: int = 8
     filters: Optional[dict] = None
+    index_name: Optional[str] = None
 
     @field_validator("question")
     @classmethod
@@ -87,6 +102,13 @@ class RetrieveRequest(BaseModel):
             raise ValueError(f"Invalid filter keys: {invalid}. Allowed: {_ALLOWED_FILTER_KEYS}")
         return v
 
+    @field_validator("index_name")
+    @classmethod
+    def validate_index_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in _ALLOWED_INDEXES:
+            raise ValueError(f"Invalid index_name. Allowed: {_ALLOWED_INDEXES}")
+        return v
+
 
 # ── Endpoints ─────────────────────────────────────────────────────────
 
@@ -111,7 +133,7 @@ def retrieve(
     """
     _verify_api_key(x_api_key)
     try:
-        client = get_client()
+        client = get_client(req.index_name)
         chunks = client.query(
             text=req.question,
             top_k=req.top_k,
