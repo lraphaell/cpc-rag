@@ -1,0 +1,18 @@
+# This workflow is now on refactor. updates Coming up soon secrets: inherit
+name: "Code Scanning Analysis"
+
+on:
+  push:
+    # this workflow would be executed at any push event to master or develop branches
+    branches: [ master, develop ]
+  pull_request:
+    # this workflow would be executed at any pull request event with base branch master or develop
+    branches: [ master, develop ]
+  workflow_dispatch:
+    # this workflow would be executed when a workflow_dispatch event is executed (via API or manually)
+
+jobs:
+  CodeQL:
+    # uses code-scanning python workflow
+    uses: melisource/fury_code-scanning-workflow/.github/workflows/python.yml@master
+    secrets: inherit
