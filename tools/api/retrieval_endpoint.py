@@ -88,8 +88,8 @@ class RetrieveRequest(BaseModel):
     @field_validator("top_k")
     @classmethod
     def top_k_range(cls, v: int) -> int:
-        if not 1 <= v <= 20:
-            raise ValueError("top_k must be between 1 and 20")
+        if not 1 <= v <= 99:
+            raise ValueError("top_k must be between 1 and 99")
         return v
 
     @field_validator("filters")
@@ -134,10 +134,18 @@ def retrieve(
     _verify_api_key(x_api_key)
     try:
         client = get_client(req.index_name)
+
+        # Transform list filter values to Pinecone $in syntax (OR matching)
+        raw_filters = req.filters or {}
+        pinecone_filters = {
+            k: ({"$in": v} if isinstance(v, list) else v)
+            for k, v in raw_filters.items()
+        }
+
         chunks = client.query(
             text=req.question,
             top_k=req.top_k,
-            filters=req.filters or {},
+            filters=pinecone_filters,
         )
         return {"chunks": chunks, "count": len(chunks)}
     except Exception:
